@@ -1,9 +1,33 @@
-var builder = WebApplication.CreateBuilder(args);
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Linq;
+using ERP.Data;
+
+var builder = WebApplication.CreateBuilder(args);
+    
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IDatabaseHelper, DatabaseHelper>(provider =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    return new DatabaseHelper(connectionString);
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 
 var app = builder.Build();
 
@@ -14,31 +38,35 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseCors("AllowSpecificOrigin");
 
-var summaries = new[]
+app.MapGet("/parts", async (IDatabaseHelper databaseHelper) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    try
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
+        var parts = databaseHelper.GetParts();
+        return Results.Ok(parts);
+    }
+    catch (Exception ex)
+    {
+        // Log the exception details as necessary
+        return Results.Problem("An error occurred while fetching parts data.");
+    }
+});
+
+app.MapGet("/boms", async (IDatabaseHelper databaseHelper) =>
+{
+    try
+    {
+        var boms = databaseHelper.GetBOMs();
+        return Results.Ok(boms);
+    }
+    catch (Exception ex)
+    {
+        // Log the exception details as necessary
+        return Results.Problem("An error occurred while fetching BOMs data.");
+    }
+});
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
