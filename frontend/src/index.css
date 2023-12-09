@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media (max-width: 768px) {
+    th, td {
+      font-size: 0.8rem; /* Smaller font size */
+      padding: 8px; /* Smaller padding */
+    }
+  }

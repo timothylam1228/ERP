@@ -10,25 +10,14 @@ interface DataGridViewProps {
 const DataGridView = (props: DataGridViewProps) => {
   const { boms, parts, selectedItem } = props
 
-  const combine = useMemo(() => {
-    const result = boms.map((bom) => {
-      const part = parts.find((part) => part.name === bom.componentName)
-      return {
+  const data = useMemo(() => {
+    return boms
+      .map((bom) => ({
         ...bom,
-        ...part,
-      }
-    })
-    return result
-  }, [boms, parts])
-
-  const renderData = () => {
-    const filteredResult = combine.filter(
-      (item) => item.parentName === selectedItem?.componentName
-    )
-    return filteredResult
-  }
-
-  const data = renderData()
+        ...parts.find((part) => part.name === bom.componentName),
+      }))
+      .filter((item) => item.parentName === selectedItem?.componentName)
+  }, [boms, parts, selectedItem])
 
   const TABLE_HEADINGS = [
     "PARENT_NAME",
@@ -41,36 +30,39 @@ const DataGridView = (props: DataGridViewProps) => {
     "MATERIAL",
   ]
   return (
-    <div className="relative px-6 md:px-12 overflow-auto overflow-y-scroll h-full overflow-x-auto">
-      <table className="w-full lg:table-fixed border-2 border-black h-full">
-        <thead className="">
-          <tr className="border-b border-blue-gray-100 bg-blue-gray-50 ">
-            {TABLE_HEADINGS.map((heading, index) => (
-              <th key={index} className="py-2 text-start text-xs sm:text-sm">
-                {heading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-gray-50 overflow-y-scroll overflow-auto h-full bg-blue-gray-100">
-          {data.map((item, index) => {
-            const isLast = index === data.length - 1
-            const className = isLast ? "" : "border-b border-blue-gray-100"
-            return (
-              <tr key={index} className="">
-                <td className={className}>{item.parentName}</td>
-                <td className={className}>{item.componentName}</td>
-                <td className={className}>{item.partNumber}</td>
-                <td className={className}>{item.title}</td>
-                <td className={className}>{item.quantity}</td>
-                <td className={className}>{item.type}</td>
-                <td className={className}>{item.item}</td>
-                <td className={className}>{item.material}</td>
+    <div className="relative flex flex-col  mx-6 md:mx-12 border-2 border-black">
+      {/* Table for thead */}
+      <table className="w-full lg:table-fixed"></table>
+
+      {/* Scrollable table for tbody */}
+      <div className="overflow-y-auto h-64 lg:h-96 overflow-x-auto">
+        {/* Adjust 'h-64' to your preferred height */}
+        <table className="w-full lg:table-fixed  table-auto overflow-auto">
+          <thead className="bg-blue-gray-50">
+            <tr className="border-b border-blue-gray-100">
+              {TABLE_HEADINGS.map((heading, index) => (
+                <th key={index} className="py-2 text-start text-xs sm:text-sm">
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-gray-50">
+            {data.map((item, index) => (
+              <tr key={index} className="border-b border-blue-gray-100">
+                <td>{item.parentName}</td>
+                <td>{item.componentName}</td>
+                <td>{item.partNumber}</td>
+                <td>{item.title}</td>
+                <td>{item.quantity}</td>
+                <td>{item.type}</td>
+                <td>{item.item}</td>
+                <td>{item.material}</td>
               </tr>
-            )
-          })}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

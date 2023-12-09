@@ -19,12 +19,13 @@ export interface Part {
   material: string
 }
 const App = () => {
-  const BASE_URL = "http://localhost:5259"
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL
   // Function to recursively build the tree
   const [parts, setParts] = useState<Part[] | []>([])
   const [boms, setBoms] = useState<Bom[] | []>([])
   const [populated, setPopulated] = useState<boolean>(false)
   const [selectedItem, setSelectedItem] = useState<Bom | null>(null)
+  const [error, setErorr] = useState<string>("")
 
   const populateData = () => {
     Promise.all([
@@ -35,10 +36,12 @@ const App = () => {
         setParts(partsData)
         setBoms(bomsData)
         setPopulated(true)
+        setErorr("")
       })
       .catch((error) => {
         console.error("Failed to fetch data:", error)
         setPopulated(false)
+        setErorr(`Failed to fetch data: ${error.message}`)
       })
   }
 
@@ -63,11 +66,12 @@ const App = () => {
               selectedItem={selectedItem}
               populating={populated}
               populateData={populateData}
+              error={error}
             />
           </div>
         </div>
       </div>
-      <div className="w-full flex ">
+      <div className="w-full flex">
         <div className="w-full h-1/2 ">
           <DataGridView boms={boms} parts={parts} selectedItem={selectedItem} />
         </div>

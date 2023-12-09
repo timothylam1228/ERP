@@ -53,7 +53,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
       </div>
       {isOpen && node.children && (
         <ul className={`ml-4 `}>
-          {node.children.map((childNode, index) => (
+          {node.children?.map((childNode, index) => (
             <TreeNode
               key={index}
               node={childNode}
@@ -69,12 +69,21 @@ const TreeNode: React.FC<TreeNodeProps> = ({
 
 const TreeView = (props: TreeViewProps) => {
   const { boms, setSelectedItem, selectedItem } = props
-  const convertBomsToTree = (items: Bom[]): Bom[] => {
-    const map = new Map<string, Bom>(
-      items.map((item) => [item.componentName, { ...item, children: [] }])
-    )
+
+  const handleSelect = (item: Bom) => {
+    if (item === selectedItem) {
+      setSelectedItem(null)
+    } else {
+      setSelectedItem(item)
+    }
+  }
+
+  const bomTree = useMemo(() => {
     const tree: Bom[] = []
-    items.forEach((item: Bom) => {
+    const map = new Map<string, Bom>(
+      boms.map((item) => [item.componentName, { ...item, children: [] }])
+    )
+    boms.forEach((item: Bom) => {
       if (item.parentName) {
         const parent = map.get(item.parentName)
         if (parent) {
@@ -86,25 +95,15 @@ const TreeView = (props: TreeViewProps) => {
       }
     })
     return tree
-  }
-
-  const bomTree = useMemo(() => convertBomsToTree(boms), [boms])
-
-  const handleSelect = (item: Bom) => {
-    if (item === selectedItem) {
-      setSelectedItem(null)
-    } else {
-      setSelectedItem(item)
-    }
-  }
+  }, [boms])
 
   return (
     <div className="border-2 border-black flex h-full w-full overflow-y-scroll items-start shadow-lg">
       <div className="flex flex-col w-full">
         <ul className="list-disc ">
-          {bomTree.map((node, index) => (
+          {bomTree.map((node) => (
             <TreeNode
-              key={index}
+              key={node.componentName}
               node={node}
               selectedItem={selectedItem}
               handleSelect={handleSelect}
