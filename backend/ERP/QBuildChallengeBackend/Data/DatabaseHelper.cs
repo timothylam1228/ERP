@@ -9,7 +9,7 @@ public class DatabaseHelper : IDatabaseHelper
 
     public DatabaseHelper(string connectionString)
     {
-        _connectionString = "Server=localhost;Database=master;User Id=sa;Password=TooSimple123@@;";
+        _connectionString = connectionString;
     }
     
     public IEnumerable<PartModel> GetParts()
@@ -26,18 +26,15 @@ public class DatabaseHelper : IDatabaseHelper
                 {
                     while (reader.Read())
                     {
-
                         var part = new PartModel
                         {
-                            Name = reader["NAME"].ToString(),
-                            Title = reader["TITLE"].ToString(),
-                            Type = reader["TYPE"].ToString(),
-                            Item = reader["ITEM"].ToString(),
-                            Material = reader["MATERIAL"].ToString(),
-                            PartNumber = reader["PART_NUMBER"].ToString()
+                            Name = reader["NAME"]?.ToString() ?? string.Empty,
+                            Title = reader["TITLE"]?.ToString() ?? string.Empty,
+                            Type = reader["TYPE"]?.ToString() ?? string.Empty,
+                            Item = reader["ITEM"]?.ToString() ?? string.Empty,
+                            Material = reader["MATERIAL"]?.ToString() ?? string.Empty,
+                            PartNumber = reader["PART_NUMBER"]?.ToString() ?? string.Empty
                         };
-                        Console.WriteLine(part);
-
                         parts.Add(part);
                     }
                 }
@@ -68,9 +65,8 @@ public class DatabaseHelper : IDatabaseHelper
                     {
                         var bom = new BOMModel
                         {
-                         
-                            ComponentName = reader["COMPONENT_NAME"].ToString(),
-                            ParentName = reader["PARENT_NAME"].ToString(),
+                            ComponentName = reader["COMPONENT_NAME"]?.ToString() ?? string.Empty,
+                            ParentName = reader["PARENT_NAME"]?.ToString() ?? string.Empty,
                             Quantity = reader["QUANTITY"] == DBNull.Value ? 0 : Convert.ToInt32(reader["QUANTITY"])
                           //Handle nulls  
                         };
