@@ -19,7 +19,9 @@ export interface Part {
   material: string
 }
 const App = () => {
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5259"
+  // read environment variables from
+  console.log("BASE_URL", BASE_URL)
   // Function to recursively build the tree
   const [parts, setParts] = useState<Part[] | []>([])
   const [boms, setBoms] = useState<Bom[] | []>([])
